@@ -504,7 +504,7 @@ fn handle_connection(mut stream: TcpStream) {
 }
 use include_dir::{include_dir, Dir};
 
-static PROJECT_DIR: Dir = include_dir!("../out/");
+static PROJECT_DIR: Dir = include_dir!("out");
 // fn findsize(tf:&include_dir::Dir)->usize{
 //     let mut total_size=0;
 //     for i in tf.entries(){
