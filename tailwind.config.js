@@ -9,7 +9,28 @@ module.exports = {
     "./src/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        background: 'var(--background)',
+        foreground: 'var(--foreground)',
+        'muted-foreground': 'var(--muted-foreground)',
+        card: 'var(--card)',
+        'card-foreground': 'var(--card-foreground)',
+        primary: 'var(--primary)',
+        'primary-foreground': 'var(--primary-foreground)',
+        secondary: 'var(--secondary)',
+        'secondary-foreground': 'var(--secondary-foreground)',
+        destructive: 'var(--destructive)',
+        'destructive-foreground': 'var(--destructive-foreground)',
+        popover: 'var(--popover)',
+        'popover-foreground': 'var(--popover-foreground)',
+        input: 'var(--input)',
+        ring: 'var(--ring)',
+        accent: 'var(--accent)',
+        'accent-foreground': 'var(--accent-foreground)',
+        'border-input': 'var(--border-input)'
+      }
+    },
   },
   plugins: [
     '@tailwindcss/line-clamp',

@@ -2,9 +2,9 @@
 name = "filedime"
 version = "0.9.7"
 description = "rust based file explorer."
-authors = ["visnk"]
+authors = ["visnk","lazybeaver"]
 license = ""
-repository = "https://github.com/visnkmr/filedime"
+repository = "https://github.com/LazyBeaver007/filedime-lln"
 edition = "2021"
 
 # [build]

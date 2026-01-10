@@ -38,18 +38,10 @@ export default function DarkButton() {
   // const [ dark, setdark ] = useState(false);
   // const [showon, setshow] = useLocalStorage("dark",true);
   // console.log("onload"+showon)
+  const [mounted, setMounted] = useState(false);
   useEffect(() => {
-    // dark?setTheme('light'):setTheme('dark');
-    const darkIcon = document.getElementById("theme-toggle-dark-icon")!;
-    const lightIcon = document.getElementById("theme-toggle-light-icon")!;
-    if (theme === 'dark') {
-      darkIcon.style.display = "block";
-      lightIcon.style.display = "none";
-    } else {
-      darkIcon.style.display = "none";
-      lightIcon.style.display = "block";
-    }
-  }, [theme]);
+    setMounted(true);
+  }, []);
   // useEffect(() => {
   //   console.log("sadsd")
   // },[showon]);
@@ -62,12 +54,16 @@ export default function DarkButton() {
       <button
         id="theme-toggle"
         type="button"
-        aria-label='light dark mode toggle'
-        className="text-gray-500  rounded-lg text-sm p-2.5"
-        onClick={()=>setTheme(theme === 'light' ? 'dark' : 'light')}
+        aria-label="light dark mode toggle"
+        className={`rounded-lg text-sm p-2.5 ${mounted ? (theme === 'dark' ? 'text-white' : 'text-gray-900') : 'text-gray-400'}`}
+        onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
       >
-        <Sun className='h-4 w-4'id="theme-toggle-dark-icon"/>
-        <Moon className='h-4 w-4' id="theme-toggle-light-icon"/>
+        {/* Render icons only after client mount to avoid hydration mismatch */}
+        {mounted ? (
+          theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />
+        ) : (
+          <span className="h-4 w-4 inline-block" />
+        )}
       </button>
       </span>
     </div>

@@ -2,7 +2,8 @@
 
 import FRc from "./findsizecomp"
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
+// Tauri APIs are only available when running inside the Tauri runtime.
+// Use guarded dynamic imports to avoid runtime errors when served in a browser.
 import {VideoComponent} from "./videoplaycomp"
 import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight, FolderPlus, FilePlus, Folder, Home, Loader2, Plug, Columns, BotIcon} from "lucide-react"
 import { Badge } from "./ui/badge"
@@ -17,7 +18,26 @@ import NewLeaf from "./new"
 import React from 'react';
 import { useKeyboardShortcut } from "./keyboardshortcuts";
 import { useMouseShortcut } from "./mouseshortcuts";
-import { listen } from '@tauri-apps/api/event';
+// Safe wrappers for Tauri APIs (no-op / fallbacks when not running in Tauri)
+const isTauri = typeof window !== 'undefined' && typeof (window as any).__TAURI_IPC__ === 'function';
+
+async function invokeTauri(cmd: string, args?: any) {
+  if (!isTauri) return Promise.reject(new Error('Not running in Tauri'));
+  const { invoke } = await import('@tauri-apps/api/tauri');
+  return invoke(cmd, args);
+}
+
+async function convertFileSrcTauri(path: string) {
+  if (!isTauri) return path;
+  const { convertFileSrc } = await import('@tauri-apps/api/tauri');
+  return convertFileSrc(path);
+}
+
+async function listenTauri<E = any>(event: string, handler: (e: E) => void) {
+  if (!isTauri) return { unlisten: async () => {} } as { unlisten: () => Promise<void> };
+  const { listen } = await import('@tauri-apps/api/event');
+  return await listen(event, handler);
+}
 import FiledimeSettings from "./filedimesettings"
 import {
   ResizableHandle,
@@ -113,7 +133,7 @@ export default function Greet() {
     async function setupAppWindow() {
       console.log(Math.random());
       const appWindow = (await import('@tauri-apps/api/window')).appWindow
-      setTimeout(async () => await invoke('show_main_window'), 100)
+      setTimeout(async () => await invokeTauri('show_main_window'), 100)
       console.log("windowname top---------->"+appWindow.label)
   
       setAppWindow(appWindow)
@@ -123,7 +143,7 @@ export default function Greet() {
       setp(pl)
       const cv = await(await import('@tauri-apps/api/app')).getVersion()
       console.log(cv)
-      invoke("checker",{}).then((r)=>{
+      invokeTauri("checker",{}).then((r)=>{
         console.log(r);
         if( r!==cv){
           toast({
@@ -198,7 +218,7 @@ export default function Greet() {
     },[perpage,sftype,fileslist])
     const [isSheetOpen, setiso] = useState(false);
     function reset(p?:string){
-      invoke("checkiffile",{
+      invokeTauri("checkiffile",{
         path:p
       }).catch((e)=>{
 
@@ -217,7 +237,7 @@ export default function Greet() {
       let lct=new Date().getTime().toString();
       
       lastcalledtime.current=lct
-      invoke('list_files', { 
+      invokeTauri('list_files', { 
         starttime:lct,
         windowname:appWindow?.label,
         oid: oid.toString(),
@@ -252,7 +272,7 @@ export default function Greet() {
       code: "KeyT",
     }); 
     useKeyboardShortcut(()=>{
-      invoke("newwindow",
+      invokeTauri("newwindow",
       {
         // id: (winInfo.tabidsalloted++).toString(),
         path: "drives://",
@@ -263,7 +283,7 @@ export default function Greet() {
       code: "KeyN", 
     });
     useKeyboardShortcut(()=>{
-      invoke(
+      invokeTauri(
         "addmark",
         {
       windowname:appWindow?.label,
@@ -307,7 +327,7 @@ export default function Greet() {
       code: "F5", 
     });
     useKeyboardShortcut(()=>{
-      invoke("navbrowsetimeline",{
+      invokeTauri("navbrowsetimeline",{
         tabid:activetabid.toString(),
         dir:true
       }).then((ei)=>{
@@ -331,7 +351,7 @@ export default function Greet() {
       code: "ArrowLeft", 
     });
     useKeyboardShortcut(()=>{
-      invoke("navbrowsetimeline",{
+      invokeTauri("navbrowsetimeline",{
         tabid:activetabid.toString(),
         dir:false
       }).then((ei)=>{
@@ -353,7 +373,7 @@ export default function Greet() {
       code: "ArrowRight", 
     });
     useKeyboardShortcut(()=>{
-      invoke("getparentpath",{
+      invokeTauri("getparentpath",{
         path
       }).then((ei)=>{
         console.log(ei)
@@ -386,34 +406,34 @@ export default function Greet() {
     let [hidefwd,sethf]=useState(true)
     useEffect(()=>{
   
-      invoke("disablenav",{
+      invokeTauri("disablenav",{
         tabid:activetabid.toString(),
         dir:true
       }).then(()=>sethb(false)
       ).catch(()=>sethb(true))
-      invoke("disablenav",{
+      invokeTauri("disablenav",{
         tabid:activetabid.toString(),
         dir:false
       }).then(()=>sethf(false)
       ).catch(()=>sethf(true))
     },[path])
       const addToTabHistory = (tabId, item=path) => {
-        invoke("checkiffile",{
-          path:p
-        }).catch((e)=>{
-          invoke("addtotabhistory",{
-            tabid:tabId,
-            path:item
-          })
-        })  
+          invokeTauri("checkiffile",{
+            path:p
+          }).catch((e)=>{
+            invokeTauri("addtotabhistory",{
+              tabid:tabId,
+              path:item
+            })
+          })  
         
-     };
+       };
    const [currentchoice,changechoiceto]=useState("")
   useEffect(()=>{
     // console.log("update listen-----"+lastcalledtime)
     reset() 
     // let printtxt=Math.random(); //to check if listen is being called only once
-    const unlisten=listen("folder-size", (event) => {
+    const unlisten=listenTauri("folder-size", (event) => {
       let returned=JSON.parse(event.payload);
       if(returned.caller===lastcalledtime.current){
         console.log("foldersize")
@@ -423,7 +443,7 @@ export default function Greet() {
       // console.log(data.payload.toString())
     });
     // let unlisten: (() => void) | undefined = undefined
-    const unlisten1=listen('list-files', (event) => {
+    const unlisten1=listenTauri('list-files', (event) => {
       // console.log(printtxt+"------->"+lastcalledtime.current+"------->"+event)
       let returned=JSON.parse(event.payload);
       // console.log(returned.caller)
@@ -464,13 +484,13 @@ export default function Greet() {
   const [visibleprogress,setvp]=useState(false)
   useEffect(()=>{
    
-    const ul1=listen("progress",(data: { payload: number }) => {
+    const ul1=listenTauri("progress",(data: { payload: number }) => {
       let cp=data.payload as number
       console.log("progress----"+cp)
       console.log("progress----"+JSON.stringify(data))
       setcp((cp))
     })
-    listen("processing",(p)=>{
+    listenTauri("processing",(p)=>{
       if((p.payload as string).includes("completed")){
       setvp(false)
       }else
@@ -482,13 +502,13 @@ export default function Greet() {
   },[]);
 
     useEffect(() => {
-      listen("folder-count",(data: { payload: string }) => {
+      listenTauri("folder-count",(data: { payload: string }) => {
         progresstotal.current=(data.payload)
       }) 
-      listen("start-timer",() => {
+      listenTauri("start-timer",() => {
         setlv(true)
       })
-      listen("stop-timer",() => {
+      listenTauri("stop-timer",() => {
         setlv(false)
       })
       // listen('load', () => {
@@ -496,7 +516,7 @@ export default function Greet() {
         
       // });
       
-      listen('dialogshow', (pl) => {
+      listenTauri('dialogshow', (pl) => {
         let recieved=JSON.parse(pl.payload);
         let content=(recieved.content)
         let title=(recieved.title)
@@ -506,17 +526,17 @@ export default function Greet() {
           description: content,
         })
       });
-      listen("fopprogress", (data: { payload: string }) => {
+      listenTauri("fopprogress", (data: { payload: string }) => {
         let progressinfo = JSON.parse(data.payload);
         console.log(JSON.stringify(progressinfo))
       });
-      listen("parent-loc", (data: { payload: string }) => {
+      listenTauri("parent-loc", (data: { payload: string }) => {
         let whattodo:parentprops=JSON.parse(data.payload)
         setpath(whattodo.path)
         setpsplitl(splitpath(whattodo.path))
         setpit(whattodo.path)
       });
-      listen("reloadlist", (data: { payload: string }) => {
+      listenTauri("reloadlist", (data: { payload: string }) => {
         switch(data.payload){
           case 'reload':reloadlist();
           break;
@@ -537,28 +557,28 @@ export default function Greet() {
         //  reloadlist();
         });
       
-      listen("button-names", (data: { payload: string }) => {
+      listenTauri("button-names", (data: { payload: string }) => {
         setcbl(JSON.parse(data.payload) as string[]);
         console.log("winnames: "+data.payload.toString())
       });
       
-      listen("fsc", (data: { payload: string }) => {
+      listenTauri("fsc", (data: { payload: string }) => {
         // console.log("fscl----->"+JSON.parse(data.payload));
         setfscl(JSON.parse(data.payload));
       });
-      listen("load-sresults", (data: { payload: string }) => {
+      listenTauri("load-sresults", (data: { payload: string }) => {
         let fl: FileItem[] = JSON.parse(data.payload) as FileItem[];
         sst("Search Results")
         // console.log("Found----->"+fl.length)
         setfileslist(fl)
         setfc(fl.length)
       });
-      listen('list-drives', (event) => {
+      listenTauri('list-drives', (event) => {
           // console.log("loading drives---->"+event.payload);
           setdriveslist(JSON.parse(event.payload));
       });
       
-      listen("load-marks", (data: { payload:string }) => {
+      listenTauri("load-marks", (data: { payload:string }) => {
         // console.log("listmarks ")
         setbms(JSON.parse(data.payload) as mark[])
       });
@@ -568,11 +588,11 @@ export default function Greet() {
       if(!appWindow)
         return
         if(!startstopfilewatch){
-          invoke('senddriveslist', { 
+          invokeTauri('senddriveslist', { 
             windowname:appWindow?.label,
         })
         reloadsize("loadmarks")
-        invoke("listtabs",{})
+        invokeTauri("listtabs",{})
         .then((e)=>{
           console.log("onopen---->"+e)
           let tabslist=JSON.parse(e) as string[];
@@ -713,7 +733,7 @@ export default function Greet() {
             <ContextMenuContent className=''>
               <ContextMenuLabel className='text-sm'>{path}</ContextMenuLabel>
               <ContextMenuItem onSelect={(e)=>{
-                invoke("newwindow",
+                invokeTauri("newwindow",
                 {
                   // id: (winInfo.tabidsalloted++).toString(),
                   path: path,
@@ -723,7 +743,7 @@ export default function Greet() {
               }}>Open in new window</ContextMenuItem>
               <ContextMenuItem onSelect={(e)=>{
                 // openTab(path)
-                invoke(
+                invokeTauri(
                   "newtab",
                   {
                     windowname:appWindow?.label,
@@ -734,7 +754,7 @@ export default function Greet() {
                 );
               }}>Open in new tab</ContextMenuItem>
               <ContextMenuItem onSelect={()=>{
-                invoke(
+                invokeTauri(
                   "addmark",
                   {
                 windowname:appWindow?.label,
@@ -982,7 +1002,7 @@ export default function Greet() {
   
     
    function addmark(path:String){
-    invoke(
+    invokeTauri(
       "addmark",
       {
     windowname:appWindow?.label,
@@ -999,7 +1019,7 @@ export default function Greet() {
         listfiles(activetabid,path)
   }
   function populatesearchlist(spath){
-    invoke(
+    invokeTauri(
       "searchload", {
         path:spath
     }).catch((e)=>console.error(e))
@@ -1010,7 +1030,7 @@ export default function Greet() {
   
   function recentfiles(){
       console.log("recent");
-      invoke(
+      invokeTauri(
       "recent_files", {
         windowname:appWindow?.label,
         string: "",
@@ -1018,11 +1038,11 @@ export default function Greet() {
   }
    
   function updatetabs(tabpath){
-    invoke("checkiffile",{
+    invokeTauri("checkiffile",{
       path:p
     }).catch((e)=>{
       console.log("update tabs called")
-    invoke(
+    invokeTauri(
       "tabname",
       {
         path:tabpath,
@@ -1050,7 +1070,7 @@ export default function Greet() {
     
   }
   function closetab(closeid){
-    invoke("closetab",{
+    invokeTauri("closetab",{
       windowname:appWindow?.label,
       id: closeid.toString(),
     }
@@ -1077,14 +1097,14 @@ export default function Greet() {
       // console.error(gotopath)
       let newtabid=`${new Date().getTime()}${salt}`;
   
-                        invoke(
+                        invokeTauri(
                           "tabname",
                           {
                             path:gotopath,
                           }
                         ).then((returned:string)=>{
                           console.log("what was returned....."+returned)
-                          invoke(
+                          invokeTauri(
                             "newtab",
                             {
                               windowname:appWindow?.label,
@@ -1127,7 +1147,7 @@ export default function Greet() {
         togglewhat:togglewhat
       };
       // console.log(appWindow?.label+"------>"+JSON.stringify(thensobj))
-      invoke(
+      invokeTauri(
         "nosize",
         thensobj);
       }
@@ -1173,7 +1193,7 @@ export default function Greet() {
               console.log(JSON.stringify(tablist))
             }}/> */}
             <Button className="ml-2" variant={"outline"} onClick={()=>{
-              invoke("newspecwindow",{
+              invokeTauri("newspecwindow",{
                 winlabel:"settings",
                 name:"Settings"
               })
@@ -1226,10 +1246,10 @@ export default function Greet() {
                   ()=>{
                     // fileopsrc.map((eachsource)=>{
 
-                      invoke('checkforconflicts', { 
-                      srclist:JSON.stringify(fileopsrc),
-                      dst:path,
-                  }).then((a)=>{
+                        invokeTauri('checkforconflicts', { 
+                        srclist:JSON.stringify(fileopsrc),
+                        dst:path,
+                      }).then((a)=>{
                     console.log(a)
                     let listofdupes:existingfileinfo[]=JSON.parse(a);
                     let newArray: operationfileinfo[] = listofdupes.map((item): operationfileinfo => ({
@@ -1239,7 +1259,7 @@ export default function Greet() {
                     console.log(typeof listofdupes[0])
                     if(listofdupes.length===0)
                     {
-                      invoke('fileop', { 
+                      invokeTauri('fileop', { 
                         srclist:JSON.stringify(fileopsrc),
                         dst:path,
                         dlastore:JSON.stringify([])
@@ -1386,7 +1406,7 @@ export default function Greet() {
                   </ContextMenuTrigger>
                   <ContextMenuContent>
                     <ContextMenuItem onSelect={()=>{
-                      invoke(
+                      invokeTauri(
                         "removemark",
                         {
                       windowname:appWindow?.label,
@@ -1406,7 +1426,7 @@ export default function Greet() {
               <h1 className='pt-8 p-2'>Tabs ({tablist.length}) 
               <Button className="ms-2 ps-2 pr-2" size="none" variant={"outline"} onClick={()=>{
                 for (const tab of tablist){
-                  invoke("closealltabs",{
+                  invokeTauri("closealltabs",{
                     })
                 }
                 console.log("closed all")
@@ -1505,7 +1525,7 @@ export default function Greet() {
              { 
               if(p==="linux" && message.mount_point.trim().length<1)
               {
-                invoke("mountdrive",{
+                invokeTauri("mountdrive",{
                   windowname:appWindow?.label,
                   uuid:message.uuid,
                   mountpoint:message.uuid
@@ -1570,7 +1590,7 @@ export default function Greet() {
            </ContextMenuTrigger>
            <ContextMenuContent>
            <ContextMenuItem onSelect={(e)=>{
-                   invoke("newwindow",
+                   invokeTauri("newwindow",
                    {
                      path: message.mount_point,
                      ff:""
@@ -1584,7 +1604,7 @@ export default function Greet() {
                   // if(path===message.mount_point){
                   //   closetab(activetabid)
                   // }
-                       invoke("unmountdrive",{
+                       invokeTauri("unmountdrive",{
                         windowname:appWindow?.label,
                         uuid:message.uuid,
                         mountpoint:message.mount_point
@@ -1593,7 +1613,7 @@ export default function Greet() {
                         // console.log(e+"-----"+message.uuid)
                         if(path===e){
                           closetab(activetabid)
-                          invoke("listtabs",{})
+                          invokeTauri("listtabs",{})
                           .then((e)=>{
                             console.log("onopen---->"+e)
                             let tabslist=JSON.parse(e) as string[];
@@ -1733,7 +1753,7 @@ export default function Greet() {
 
           <Button className='rounded-lg border bg-card text-card-foreground shadow-sm  p-1'   onClick={
             ()=>{
-              invoke(
+              invokeTauri(
                 "otb",
                 {
                   bname: bn,
@@ -1758,7 +1778,7 @@ export default function Greet() {
             `} >
 
             <Button variant={"ghost"}onClick={()=>{
-                 invoke("navbrowsetimeline",{
+                 invokeTauri("navbrowsetimeline",{
                   tabid:activetabid.toString(),
                   dir:true
                 }).then((ei)=>{
@@ -1777,7 +1797,7 @@ export default function Greet() {
             <div>
 
             <Button variant={"ghost"}onClick={()=>{
-                 invoke("getparentpath",{
+                 invokeTauri("getparentpath",{
                   path
                 }).then((ei)=>{
                   console.log(ei)
@@ -1794,7 +1814,7 @@ export default function Greet() {
             <div>
 
             <Button className={`${hidefwd?"hidden":""} `} variant="ghost"  onClick={()=>{
-               invoke("navbrowsetimeline",{
+               invokeTauri("navbrowsetimeline",{
                 tabid:activetabid.toString(),
                 dir:false
               }).then((ei)=>{
@@ -1826,14 +1846,14 @@ export default function Greet() {
                 onChange={(event) =>
                   {
                     setpit(event.target.value);
-                    invoke('doespathexist', { 
+                    invokeTauri('doespathexist', { 
                               path: event.target.value
                           })
                             .then(result => {
                               setvalid(result)
                           })
                             .catch(console.error)
-                    invoke(
+                    invokeTauri(
                       "get_path_options", 
                       {
                         windowname:appWindow?.label,
@@ -1885,7 +1905,7 @@ export default function Greet() {
 
                 lastcalledtime.current=lct
                 
-                    invoke(
+                    invokeTauri(
                     "search_try", {
                       starttime:lct,
                       windowname:appWindow?.label,

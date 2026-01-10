@@ -159,3 +159,201 @@ h4{
     padding-left: 10%;
     padding-right: 10%;
 }*/
+/* Glass / translucent utilities */
+:root {
+  --glass-blur: 6px;
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-blue: rgba(59, 130, 246, 0.06);
+  --glass-purple: rgba(139, 92, 246, 0.06);
+  --glass-rose: rgba(244, 63, 94, 0.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --glass-border: rgba(255, 255, 255, 0.06);
+    --glass-bg: rgba(255, 255, 255, 0.02);
+  }
+}
+
+.glass {
+  background-color: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.05);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.05);
+  border-radius: 0.5rem;
+  transition: background-color .15s ease, transform .12s ease;
+}
+.glass:hover {
+  transform: translateY(-1px);
+}
+.bg-glass-blue { background-color: var(--glass-blue); border-color: rgba(59,130,246,0.12); }
+.bg-glass-purple { background-color: var(--glass-purple); border-color: rgba(139,92,246,0.12); }
+.bg-glass-rose { background-color: var(--glass-rose); border-color: rgba(244,63,94,0.12); }
+
+/* Improve legibility for light theme: make text inside glass high-contrast white */
+body:not(.dark) .glass {
+  --foreground: #ffffff;
+  --muted-foreground: #ffffff;
+  --card-foreground: #ffffff;
+  --popover-foreground: #ffffff;
+}
+
+/* Force specific utility classes inside glass to be fully opaque white and add subtle shadow */
+.glass .text-muted-foreground { color: rgba(255,255,255,0.96) !important; }
+.glass .text-foreground { color: rgba(255,255,255,1) !important; }
+.glass .text-card-foreground { color: rgba(255,255,255,0.98) !important; }
+.glass .text-popover-foreground { color: rgba(255,255,255,0.98) !important; }
+.glass * { text-shadow: 0 1px 2px rgba(0,0,0,0.45); }
+
+/* Force white text color for any elements inside glass containers (overrides Tailwind text-gray-* classes) */
+.glass, body:not(.dark) .glass {
+  color: #ffffff !important;
+}
+.glass :where(h1,h2,h3,h4,p,span,a,li,button,input,textarea,label,small,strong,th,td) {
+  color: #ffffff !important;
+}
+.glass .text-gray-900,
+.glass .text-gray-800,
+.glass .text-gray-700,
+.glass .text-gray-600,
+.glass .text-gray-500,
+.glass .text-gray-400,
+.glass .text-gray-300,
+.glass .text-neutral-800,
+.glass .text-neutral-700 { color: #ffffff !important; }
+
+/* Make placeholders readable */
+.glass input::placeholder,
+.glass textarea::placeholder { color: rgba(255,255,255,0.7) !important; }
+
+/* SVGs that rely on currentColor inherit white inside glass */
+.glass svg { color: #ffffff !important; }
+.glass svg path, .glass svg circle, .glass svg rect { fill: currentColor !important; stroke: currentColor !important; }
+
+/* Make inputs, address/search bars and common background boxes black in light theme */
+body:not(.dark) .glass input,
+body:not(.dark) .glass textarea,
+body:not(.dark) .glass select,
+body:not(.dark) .glass .bg-input,
+body:not(.dark) .glass .bg-card,
+body:not(.dark) .glass .bg-popover,
+body:not(.dark) .glass .card,
+body:not(.dark) .glass .button,
+body:not(.dark) .glass .btn,
+body:not(.dark) .glass .search-input {
+  background-color: rgba(0,0,0,0.7) !important;
+  border-color: rgba(255,255,255,0.12) !important;
+  color: #ffffff !important;
+}
+
+/* Make input borders and inner icons visible */
+body:not(.dark) .glass input,
+body:not(.dark) .glass textarea { box-shadow: none !important; }
+body:not(.dark) .glass input::placeholder,
+body:not(.dark) .glass textarea::placeholder { color: rgba(255,255,255,0.65) !important; }
+
+/* Specific override for the path/address and search inputs (common Tailwind border class names) */
+body:not(.dark) .glass .border-gray-300 {
+  background-color: rgba(0,0,0,0.7) !important;
+  border-color: rgba(255,255,255,0.12) !important;
+  color: #ffffff !important;
+}
+
+/* small utility for softer glass */
+.glass-soft { background-color: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.04); }
+
+/* Warm theme tokens (light) and dark overrides */
+:root {
+  /* core UI */
+  --background: #fff8f2;
+  --foreground: #2b2b2b;
+  --muted-foreground: #ffffff; /* make unboxed/muted text white in light theme for visibility over background image */
+
+  /* semantic colors */
+  --primary: #c2410c; /* warm orange */
+  --primary-foreground: #ffffff;
+  --secondary: #fb923c;
+  --secondary-foreground: #0f172a;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  /* surfaces */
+  --card: rgba(255,255,255,0.7);
+  --card-foreground: #1f2937;
+  --popover: rgba(255,255,255,0.75);
+  --popover-foreground: #1f2937;
+  --input: rgba(255,255,255,0.65);
+  --border-input: rgba(15,23,42,0.06);
+
+  /* rings / accents */
+  --ring: rgba(194,65,12,0.32);
+  --accent: rgba(251,229,214,1);
+  --accent-foreground: #87431b;
+}
+
+/* Dark theme (class-based; next-themes uses .dark) */
+.dark {
+  --background: #071029;
+  --foreground: #e6e1db;
+  --muted-foreground: #9ca3af;
+
+  --primary: #fb923c;
+  --primary-foreground: #071029;
+  --secondary: #f97316;
+  --secondary-foreground: #071029;
+  --destructive: #ef4444;
+  --destructive-foreground: #fff;
+
+  --card: rgba(12,18,22,0.48);
+  --card-foreground: #e6e1db;
+  --popover: rgba(6,10,16,0.6);
+  --popover-foreground: #e6e1db;
+  --input: rgba(255,255,255,0.04);
+  --border-input: rgba(255,255,255,0.06);
+
+  --ring: rgba(251,146,60,0.28);
+  --accent: rgba(20,12,8,0.6);
+  --accent-foreground: #fbd6c2;
+}
+
+/* map token names used across components to CSS variables */
+.bg-card { background-color: var(--card); }
+.text-card-foreground { color: var(--card-foreground); }
+.bg-popover { background-color: var(--popover); }
+.text-popover-foreground { color: var(--popover-foreground); }
+.bg-input { background-color: var(--input); }
+.border-input { border-color: var(--border-input); }
+.text-foreground { color: var(--foreground); }
+.text-muted-foreground { color: var(--muted-foreground); }
+.bg-primary { background-color: var(--primary); }
+.text-primary-foreground { color: var(--primary-foreground); }
+.bg-secondary { background-color: var(--secondary); }
+.text-secondary-foreground { color: var(--secondary-foreground); }
+.bg-destructive { background-color: var(--destructive); }
+.text-destructive-foreground { color: var(--destructive-foreground); }
+.ring-ring { --tw-ring-color: var(--ring); }
+
+/* background image + apply base background and text color */
+:root {
+  --bg-image: url('/bg.jpg'); /* update path if your image lives elsewhere */
+  --bg-overlay-light: linear-gradient(180deg, rgba(255,255,255,0.30), rgba(255,255,255,0.05));
+  --bg-overlay-dark: linear-gradient(180deg, rgba(7,16,41,0.45), rgba(7,16,41,0.18));
+}
+
+body {
+  background-image: var(--bg-overlay-light), var(--bg-image);
+  background-size: cover, cover;
+  background-position: center center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-color: var(--background);
+  color: var(--foreground);
+  min-height: 100vh;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-image: var(--bg-overlay-dark), var(--bg-image);
+  }
+}

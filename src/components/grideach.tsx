@@ -35,7 +35,7 @@ export default function EachFromGrid({message,goto,newtab,populatesearchlist,sho
     <ContextMenuTrigger className="h-full w-full overflow-hidden">
       <HoverCard >
         <HoverCardTrigger className="h-full w-full">
-            <span className="flex justify-items-center w-full h-full p-6 overflow-hidden" onDoubleClick={
+            <span className="flex justify-items-center w-full h-full p-3 overflow-hidden" onDoubleClick={
             ()=>
             { 
               goto(message)
@@ -66,8 +66,8 @@ export default function EachFromGrid({message,goto,newtab,populatesearchlist,sho
             </div>
             <div className="w-full flex justify-between overflow-hidden">
 
-              <span className="font-medium text-lg overflow-hidden">{message.name}{message.foldercon>0 ? "(" + message.foldercon + ")" : ""}</span>
-              
+              <span className="font-medium text-base overflow-hidden">{message.name}{message.foldercon>0 ? "(" + message.foldercon + ")" : ""}</span>
+
             </div>
            </div>
             </div>
