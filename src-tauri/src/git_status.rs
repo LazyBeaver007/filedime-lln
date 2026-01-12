@@ -1,3 +1,4 @@
+use filesize::file_real_size_fast;
 use git2::{opts, Repository, StatusOptions};
 use std::path::{Path, PathBuf};
 use std::fs;
@@ -26,7 +27,7 @@ pub fn has_commits(path: &str)->bool
 
 pub fn has_uncommitted_changes(path:&str)->bool
 {
-    match Respository::open(path)
+    match Repository::open(path)
     {
         Ok(repo) => 
         {
@@ -39,7 +40,7 @@ pub fn has_uncommitted_changes(path:&str)->bool
                 Ok(statuses) => {
                     !statuses.is_empty()
                 }
-                Err(_)=>false;
+                Err(_)=>false,
             }
         }
 
