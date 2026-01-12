@@ -26,13 +26,13 @@ export default function RootLayout({
 
   // const [showon, setshow] = useLocalStorage("dark",true);
   return (
-    <html suppressHydrationWarning className="h-full" lang="en">
-      <body className="h-full flex flex-col dark:bg-gray-900">
+    <html suppressHydrationWarning className="min-h-screen" lang="en">
+      <body className="min-h-screen flex flex-col dark:bg-gray-900">
         <Providers>
 
         <TauriPolyfill />
-        <div className="glass p-6 m-6 w-full max-w-7xl mx-auto">
-          {/* main app content uses frosted glass styles */}
+        <div className="glass p-6 w-full min-h-screen flex-1">
+          {/* main app content uses frosted glass styles and fills viewport */}
           {children}
         </div>
 
