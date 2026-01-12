@@ -1,7 +1,8 @@
 [![Github All Releases](https://img.shields.io/github/downloads/visnkmr/filedime/total.svg)]()  
 Filedime, an open source almost feature complete file explorer written in Rust (for all filesystem interaction,backend), Tauri(for frontend, front-backend intercom), File querying using Ollama (Go) and RAG (Python).
 
-![](https://cdn.jsdelivr.net/gh/visnkmr/filedime@nextrelease/quickintro.png) 
+![](<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/a91740dc-c272-4ab1-8cd9-568e16dcb854" />
+) 
 
 Features implemented:
 
