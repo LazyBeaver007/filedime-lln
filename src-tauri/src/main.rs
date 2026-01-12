@@ -19,6 +19,7 @@ mod fileitem;
 mod filltrie;
 mod lastmodcalc;
 mod navtimeline;
+mod git_status;
 mod sendtofrontend;
 use chrono::{DateTime, Local, Utc};
 use local_ip_address::local_ip;
@@ -528,6 +529,31 @@ async fn show_main_window(window: tauri::Window) {
     window.maximize().unwrap();
     window.show().unwrap();
 }
+
+
+//git status 
+#[tauri::command]
+async fn check_git_status (
+    path:String,
+    window: Window,
+    state: State<'_, AppStateStore>,
+)->Result<String,String>
+{
+
+    let status = git_status::get_git_status(&path);
+
+    Ok(serde_json::to_string(&json!(
+                {
+                    "isRepo":status.is_repo,
+                    "hasCommits":status.has_commits,
+                    "hasChanges":status.has_changes,
+                }
+    )).unwrap())
+
+}
+
+
+
 fn main() {
     // println!("{:?}",findsize(&PROJECT_DIR));
     thread::spawn(move || {
@@ -610,6 +636,10 @@ fn main() {
             unmountdrive,
             // whattoload,
             // get_window_label
+            //
+            //
+            // git status 
+            check_git_status,
         ])
         .build(tauri::generate_context!())
         .expect("Failed to start app");
