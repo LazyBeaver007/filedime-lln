@@ -10,6 +10,8 @@
     "build": "next build",
     "postbuild": "next-sitemap",
     "dev": "next dev",
+    "dev:all": "node scripts/dev-all.js",
+    "build:app": "npm run build && npx tauri build",
     "lint": "next lint",
     "export": "next export"
   },
