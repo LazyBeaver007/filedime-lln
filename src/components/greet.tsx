@@ -218,21 +218,28 @@ export default function Greet() {
     },[perpage,sftype,fileslist])
     const [isSheetOpen, setiso] = useState(false);
     function reset(p?:string){
-      invokeTauri("checkiffile",{
-        path:p
-      }).catch((e)=>{
-
-        if(p){
-          setpath(p);
-          setpsplitl(splitpath(p))
-        }
+      if (p) {
+        setpath(p);
+        setpsplitl(splitpath(p));
+      }
+      invokeTauri("checkiffile",{ path: p }).catch((e)=>{
+        // ignore
+      }).finally(()=>{
         setsftype("all")
-          setfileslist([])
-          setfc(0)
-          setss("")
-          console.log("reset done")
+        setfileslist([])
+        setfc(0)
+        setss("")
+        console.log("reset done")
       })
     }
+
+    // broadcast path changes so other UI (like git status indicator) can react
+    useEffect(()=>{
+      try{
+        const ev = new CustomEvent('filedime:path-changed',{detail: path})
+        if(typeof window !== 'undefined') window.dispatchEvent(ev)
+      }catch(e){}
+    },[path])
     function listfiles(oid,path){
       let lct=new Date().getTime().toString();
       
