@@ -1,6 +1,6 @@
 {
   "name": "filedime",
-  "version": "0.9.7",
+  "version": "0.0.2",
   "private": true,
   "engines": {
     "node": "20.x"
@@ -11,11 +11,13 @@
     "postbuild": "next-sitemap",
     "dev": "next dev",
     "dev:all": "node scripts/dev-all.js",
-    "build:app": "npm run build && npx tauri build",
+    "build:app:win": "npm run build && npx tauri build --target windows",
+    "build:app:linux": "npm run build && npx tauri build --target appimage",
+    "build:app": "npm run build:app:win && npm run build:app:linux",
     "lint": "next lint",
     "export": "next export"
   },
-  "author": "visnkmr",
+  "author": "visnkmr,LazyBeaver007",
   "license": "MIT",
   "devDependencies": {
     "@radix-ui/react-popover": "1.0.7",
