@@ -541,12 +541,14 @@ async fn check_git_status (
 {
 
     let status = git_status::get_git_status(&path);
-
     Ok(serde_json::to_string(&json!(
                 {
                     "isRepo":status.is_repo,
                     "hasCommits":status.has_commits,
                     "hasChanges":status.has_changes,
+                    "branch":status.branch,
+                    "remote":status.remote,
+                    "lastCommit":status.last_commit,
                 }
     )).unwrap())
 

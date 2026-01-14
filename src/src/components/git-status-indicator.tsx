@@ -20,11 +20,14 @@ export default function GitStatusIndicator() {
       const tauri = await import('@tauri-apps/api/tauri')
       const pathApi = await import('@tauri-apps/api/path')
       const home = pathToCheck ?? (await pathApi.homeDir())
+      console.log("[git-status] invoking check_git_status with", home)
       const res = await tauri.invoke<string>("check_git_status", { path: home })
+      console.log("[git-status] raw response:", res)
       const parsed: GitStatus = JSON.parse(res)
+      console.log("[git-status] parsed:", parsed)
       setStatus(parsed)
     } catch (e) {
-      // ignore errors (not a git repo, no tauri available in browser, etc.)
+      console.error("[git-status] failed to fetch status:", e)
     }
   }
 
@@ -69,6 +72,19 @@ export default function GitStatusIndicator() {
       </span>
     </div>
   )
+
+  async function openExternal(url?: string) {
+    if (!url) return
+    try {
+      const shell = await import('@tauri-apps/api/shell')
+      await shell.open(url)
+    } catch (e) {
+      // fallback for browser/dev: open in new tab
+      try {
+        window.open(url, '_blank', 'noopener')
+      } catch (_) {}
+    }
+  }
 
   return (
     <div style={{ position: "fixed", top: 8, right: 8, zIndex: 9999 }}>

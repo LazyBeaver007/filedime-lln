@@ -51,10 +51,41 @@ pub fn has_uncommitted_changes(path:&str)->bool
 
 pub fn get_git_status(path: &str)->GitStatus 
 {
+    // attempt to read some git metadata (branch, remote, last commit)
+    let mut branch: Option<String> = None;
+    let mut remote: Option<String> = None;
+    let mut last_commit: Option<String> = None;
+
+    if let Ok(repo) = Repository::open(path) {
+        // branch / HEAD
+        if let Ok(head) = repo.head() {
+            if let Some(name) = head.shorthand() {
+                branch = Some(name.to_string());
+            }
+            if let Ok(peeled) = head.peel_to_commit() {
+                last_commit = Some(peeled.id().to_string());
+            }
+        }
+
+        // remote (pick first remote if any)
+        if let Ok(remotes) = repo.remotes() {
+            if let Some(first) = remotes.get(0) {
+                if let Ok(rm) = repo.find_remote(first) {
+                    if let Some(url) = rm.url() {
+                        remote = Some(url.to_string());
+                    }
+                }
+            }
+        }
+    }
+
     GitStatus {
         is_repo: is_git_repository(path),
         has_commits: has_commits(path),
         has_changes:has_uncommitted_changes(path),
+        branch,
+        remote,
+        last_commit,
     }
 }
 
@@ -67,4 +98,7 @@ pub struct GitStatus
     pub is_repo:bool,
     pub has_commits: bool,
     pub has_changes: bool,
+    pub branch: Option<String>,
+    pub remote: Option<String>,
+    pub last_commit: Option<String>,
 }

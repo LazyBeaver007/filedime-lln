@@ -7,6 +7,7 @@ import Footer from "../src/components/footer"
 import Topthread from "../src/components/topthread"
 import TauriPolyfill from "../src/components/tauri-polyfill"
 import GitStatusIndicator from "../src/components/git-status-indicator"
+import GitStatusBox from "../src/components/git-status-box"
 // import { useLocalStorage } from "../src/components/useLocalStorage"
 import '../styles/globals.css'
 import DarkButton from "../components/but"
@@ -33,6 +34,7 @@ export default function RootLayout({
 
         <TauriPolyfill />
         <GitStatusIndicator />
+        <GitStatusBox />
         <div className="glass p-6 w-full min-h-screen flex-1">
           {/* main app content uses frosted glass styles and fills viewport */}
           {children}
